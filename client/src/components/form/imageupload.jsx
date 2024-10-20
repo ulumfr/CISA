@@ -40,7 +40,11 @@ const ImageUploadForm = ({
             )}
             <div className="flex flex-wrap gap-2">
               {previewImages.map((image, index) => (
-                <div key={index} className="relative w-20 h-20">
+                <div
+                  key={index}
+                  className="relative w-20 h-20"
+                  id={`image-${index}`}
+                >
                   <img
                     src={image.url}
                     alt={`Preview ${image.idImage}`}
@@ -53,6 +57,7 @@ const ImageUploadForm = ({
                   )} */}
                   <button
                     type="button"
+                    id="button-gambar"
                     onClick={() => onDeleteImage(index)}
                     className="absolute top-0 right-0 p-1 bg-red-500 text-white rounded-full"
                   >

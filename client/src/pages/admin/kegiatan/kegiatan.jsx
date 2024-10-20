@@ -90,8 +90,8 @@ const KegiatanPage = () => {
   useEffect(() => {
     const filtered = searchQuery
       ? dataKegiatan.filter((kegiatan) =>
-        kegiatan.title.toLowerCase().includes(searchQuery.toLowerCase())
-      )
+          kegiatan.title.toLowerCase().includes(searchQuery.toLowerCase())
+        )
       : dataKegiatan;
 
     setFilteredData(filtered);
@@ -182,30 +182,43 @@ const KegiatanPage = () => {
     setSelectedKegiatan(null);
   };
 
-  const handleSaveKegiatan = async () => {
-    if (
-      !formData.title ||
-      !formData.desc ||
-      !formData.tanggal ||
-      !formData.jenisKegiatan ||
-      !formData.sekolahId
-    ) {
-      toast.error("Semua kolom harus diisi!");
-      return;
-    }
+  const stripTags = (input) => {
+    return input.replace(/<\/?[^>]+(>|$)/g, "").trim();
+  };
 
-    if (formData.gambar.length === 0) {
-      toast.error("Minimal 1 gambar yang diupload");
-      return;
+  const handleSaveKegiatan = async () => {
+    const cleanedDesc = stripTags(formData.desc);
+
+    if (
+      !formData.title &&
+      !cleanedDesc &&
+      !formData.jenisKegiatan &&
+      !formData.sekolahId &&
+      !formData.tanggal &&
+      formData.gambar.length === 0
+    ) {
+      return toast.error("Semua kolom harus diisi");
+    } else if (!formData.title) {
+      return toast.error("Judul kegiatan harus diisi");
+    } else if (!cleanedDesc) {
+      return toast.error("Deskripsi kegiatan harus diisi");
+    } else if (!formData.jenisKegiatan) {
+      return toast.error("Jenis kegiatan harus diisi");
+    } else if (!formData.sekolahId) {
+      return toast.error("Harus memilih sekolah");
+    } else if (!formData.tanggal) {
+      return toast.error("Tanggal kegiatan harus diisi");
+    } else if (formData.gambar.length === 0) {
+      return toast.error("Minimal 1 gambar yang harus diupload");
     }
 
     const formDataToSend = new FormData();
 
     formDataToSend.append("judul", formData.title);
     formDataToSend.append("deskripsi", formData.desc);
-    formDataToSend.append("tanggal", formData.tanggal);
     formDataToSend.append("jenisKegiatan", formData.jenisKegiatan);
     formDataToSend.append("sekolahId", formData.sekolahId);
+    formDataToSend.append("tanggal", formData.tanggal);
 
     formData.gambar.forEach((file) => {
       if (!file.idImage) {
@@ -353,11 +366,13 @@ const KegiatanPage = () => {
     action: (
       <div className="flex gap-3 items-center">
         <LuPen
+          id="update-button"
           className="text-second cursor-pointer"
           onClick={() => handleEditClick(kegiatan)}
           size={20}
         />
         <FaRegTrashAlt
+          id="delete-button"
           className="text-button cursor-pointer"
           onClick={() => handleDeleteClick(kegiatan)}
           size={20}
@@ -398,6 +413,7 @@ const KegiatanPage = () => {
             </div>
 
             <Button
+              id="add-button"
               color="bg-main"
               name="Tambah"
               icon={<FaPlus size={24} />}
@@ -422,7 +438,10 @@ const KegiatanPage = () => {
         width="w-[377px]"
         justify="justify-center"
       >
-        <h2 className="text-2xl font-semibold text-main text-center">
+        <h2
+          className="text-2xl font-semibold text-main text-center"
+          id="konfirm-delete"
+        >
           Apakah Anda Yakin Ingin Menghapus?
         </h2>
       </Modal>

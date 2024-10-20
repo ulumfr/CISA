@@ -53,7 +53,7 @@ export default {
         await conn.query("INSERT INTO imageinformasi (informasiId, fileName) VALUES (?, ?)", [informasiId, imagePath]);
       }
       return res.status(201).json({
-        message: "Informasi Berhasil Dibuat!",
+        message: "Informasi berhasil dibuat",
       });
     } catch (error) {
       const err = error as Error;
@@ -142,7 +142,7 @@ export default {
       await conn.query(`DELETE FROM imageinformasi  WHERE informasiId = ?`, [id]);
       await conn.query(`DELETE FROM informasi  WHERE id = ?`, [id]);
       return res.status(200).json({
-        message: "Kegiatan berhasil dihapus!",
+        message: "Informasi berhasil dihapus",
       });
     } catch (error) {
       const err = error as Error;

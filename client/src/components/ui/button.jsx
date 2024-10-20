@@ -1,6 +1,7 @@
 import React from "react";
 
 const Button = ({
+  id,
   name,
   width,
   color,
@@ -12,6 +13,7 @@ const Button = ({
   justify = "justify-center",
 }) => (
   <button
+    id={id}
     className={`${color} text-white ${rounded} py-3 ${width} flex gap-3 items-center ${justify} ${padding}`}
     onClick={onClick}
   >

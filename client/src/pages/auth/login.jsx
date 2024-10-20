@@ -30,6 +30,12 @@ const LoginPage = () => {
     e.preventDefault();
     setLoading(true);
 
+    if (!formData.username || !formData.password) {
+      toast.error("Username dan Password wajib diisi");
+      setLoading(false);
+      return;
+    }
+
     try {
       const response = await axios.post("/api/user/auth/login", formData);
       if (response.status === 200) {
@@ -108,6 +114,7 @@ const LoginPage = () => {
             </div>
           </div>
           <Button
+            id="login"
             name={loading ? "Logging in..." : "Login"}
             width="w-full"
             color="bg-button"

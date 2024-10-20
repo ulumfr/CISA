@@ -22,7 +22,7 @@ export default {
       await conn.query("update struktur set imageName = ? where id=1", [imageUrl]);
 
       res.status(200).json({
-        message: "Berhasil Mengganti Struktur",
+        message: "Struktur berhasil diupdate",
         // result: imageUrl,
       });
     } catch (error) {

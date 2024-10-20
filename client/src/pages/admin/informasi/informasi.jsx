@@ -79,8 +79,8 @@ const InformasiPage = () => {
   useEffect(() => {
     const filtered = searchQuery
       ? dataInformasi.filter((informasi) =>
-        informasi.title.toLowerCase().includes(searchQuery.toLowerCase())
-      )
+          informasi.title.toLowerCase().includes(searchQuery.toLowerCase())
+        )
       : dataInformasi;
 
     setFilteredData(filtered);
@@ -162,20 +162,31 @@ const InformasiPage = () => {
     setSelectedInformasi(null);
   };
 
+  const stripTags = (input) => {
+    return input.replace(/<\/?[^>]+(>|$)/g, "").trim();
+  };
+
   const handleSaveInformasi = async () => {
-    if (!formData.title || !formData.desc || !formData.tanggal) {
-      toast.error("Semua kolom harus diisi!");
-      return;
-    }
+    const cleanedDesc = stripTags(formData.desc);
 
-    if (formData.sekolahId.length === 0) {
-      toast.error("Harus memilih minimal 1 sekolah");
-      return;
-    }
-
-    if (formData.gambar.length === 0) {
-      toast.error("Minimal 1 gambar yang diupload");
-      return;
+    if (
+      !formData.title &&
+      !cleanedDesc &&
+      !formData.tanggal &&
+      formData.sekolahId.length === 0 &&
+      formData.gambar.length === 0
+    ) {
+      return toast.error("Semua kolom harus diisi");
+    } else if (!formData.title) {
+      return toast.error("Judul informasi harus diisi");
+    } else if (!cleanedDesc) {
+      return toast.error("Deskripsi informasi harus diisi");
+    } else if (!formData.tanggal) {
+      return toast.error("Tanggal informasi harus diisi");
+    } else if (formData.sekolahId.length === 0) {
+      return toast.error("Harus memilih minimal 1 sekolah");
+    } else if (formData.gambar.length === 0) {
+      return toast.error("Minimal 1 gambar yang harus diupload");
     }
 
     const formDataToSend = new FormData();
@@ -337,11 +348,13 @@ const InformasiPage = () => {
     action: (
       <div className="flex gap-3 items-center">
         <LuPen
+          id="update-button"
           className="text-second"
           onClick={() => handleEditClick(informasi)}
           size={20}
         />
         <FaRegTrashAlt
+          id="delete-button"
           className="text-button"
           onClick={() => handleDeleteClick(informasi)}
           size={20}
@@ -382,6 +395,7 @@ const InformasiPage = () => {
             </div>
 
             <Button
+              id="add-button"
               color="bg-main"
               name="Tambah"
               icon={<FaPlus size={24} />}
@@ -406,7 +420,10 @@ const InformasiPage = () => {
         width="w-[377px]"
         justify="justify-center"
       >
-        <h2 className="text-2xl font-semibold text-main text-center">
+        <h2
+          className="text-2xl font-semibold text-main text-center"
+          id="konfirm-delete"
+        >
           Apakah Anda Yakin Ingin Menghapus?
         </h2>
       </Modal>

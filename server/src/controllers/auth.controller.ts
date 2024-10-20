@@ -70,7 +70,7 @@ export default {
         );
 
         res.status(200).json({
-          message: "Login Berhasil",
+          message: "Login berhasil",
           token,
         });
       }
@@ -105,7 +105,7 @@ export default {
       blacklistedTokens.add(accessToken);
 
       res.status(200).json({
-        message: "Logout Sukses",
+        message: "Logout berhasil",
       });
     } catch (error) {
       const err = error as Error;

@@ -82,7 +82,7 @@ const Sidebar = () => {
             className="w-20"
           />
           {!isMobile && (
-            <h1 className="text-2xl text-main font-bold text-center">
+            <h1 className="text-2xl text-main font-bold text-center" id="admin">
               Cita Sakinah Administrator
             </h1>
           )}
@@ -125,7 +125,7 @@ const Sidebar = () => {
               <h4 className="text-xs">{namaSekolah}</h4>
             </div>
           )}
-          <button onClick={handleLogoutClick}>
+          <button onClick={handleLogoutClick} id="logout">
             <LuLogOut size={24} />
           </button>
         </div>
@@ -138,7 +138,10 @@ const Sidebar = () => {
         width="w-[377px]"
         justify="justify-center"
       >
-        <h2 className="text-2xl font-semibold text-main text-center">
+        <h2
+          className="text-2xl font-semibold text-main text-center"
+          id="konfirm-logout"
+        >
           Apakah Anda Ingin Log Out?
         </h2>
       </Modal>

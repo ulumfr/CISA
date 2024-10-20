@@ -62,7 +62,7 @@ export default {
       }
 
       return res.status(200).json({
-        message: "Data sekolah berhasil di update",
+        message: "Data sekolah berhasil diupdate",
       });
     } catch (error) {
       const err = error as Error;

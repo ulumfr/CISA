@@ -36,7 +36,7 @@ export default {
       ]);
 
       res.status(201).json({
-        message: "Fasilitas Berhasil dibuat",
+        message: "Fasilitas berhasil dibuat",
       });
     } catch (error) {
       const err = error as Error;
@@ -72,7 +72,7 @@ export default {
       }
 
       return res.status(200).json({
-        message: "Fasilitas berhasil diubah",
+        message: "Fasilitas berhasil diupdate",
       });
     } catch (error) {
       const err = error as Error;
@@ -94,7 +94,7 @@ export default {
 
       await conn.query(`delete from fasilitas where id = ?`, [id]);
 
-      return res.status(200).json({ message: "Fasilitas dihapus" });
+      return res.status(200).json({ message: "Fasilitas berhasil dihapus" });
     } catch (error) {
       const err = error as Error;
       res.status(500).json({

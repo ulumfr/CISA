@@ -119,7 +119,7 @@ export default {
         await conn.query("INSERT INTO imagekegiatan (kegiatanId, fileName) VALUES (?, ?)", [kegiatanId, imagePath]);
       }
       return res.status(201).json({
-        message: "Kegiatan berhasil dibuat!",
+        message: "Kegiatan berhasil dibuat",
       });
     } catch (error) {
       const err = error as Error;
@@ -167,7 +167,7 @@ export default {
       }
 
       return res.status(200).json({
-        message: "Kegiatan berhasil diupdated!",
+        message: "Kegiatan berhasil diupdate",
       });
     } catch (error) {
       const err = error as Error;
@@ -195,7 +195,7 @@ export default {
       const deleteImage = await conn.query(`DELETE FROM imagekegiatan  WHERE kegiatanId = ?`, [id]);
       const result = await conn.query(`DELETE FROM kegiatan  WHERE id = ?`, [id]);
       return res.json({
-        message: "Kegiatan berhasil dihapus!",
+        message: "Kegiatan berhasil dihapus",
       });
     } catch (error) {
       const err = error as Error;

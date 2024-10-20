@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { FiChevronDown, FiChevronUp } from "react-icons/fi";
-import ReactQuill from "react-quill"; // Import ReactQuill
-import "react-quill/dist/quill.snow.css"; // Import ReactQuill styles
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 
 const InputField = ({
   icon,
@@ -75,7 +75,7 @@ const InputField = ({
           />
         ) : dropdown ? (
           <>
-            <div className="flex items-center w-full relative">
+            <div className="flex items-center w-full relative" id="dropdown">
               <div
                 onClick={handleDropdownToggle}
                 className="flex-1 cursor-pointer outline-none bg-transparent"
@@ -95,6 +95,7 @@ const InputField = ({
                     key={index}
                     onClick={() => handleOptionSelect(option.value)}
                     className="p-2 cursor-pointer hover:bg-gray-100 text-main rounded-lg"
+                    id={`option-${index}`}
                   >
                     {option.label}
                   </div>
