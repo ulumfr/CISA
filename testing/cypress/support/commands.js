@@ -24,35 +24,3 @@ Cypress.Commands.add(
     });
   }
 );
-
-Cypress.Commands.add("clearFormFields", (clearFields = {}) => {
-  cy.get("#update-button").first().click();
-  if (clearFields.title) {
-    cy.get("#title").clear();
-    cy.get("#title").should("have.value", "");
-  }
-  if (clearFields.desc) {
-    cy.get(".ql-editor").clear();
-    cy.get(".ql-editor").should("have.value", "");
-  }
-  if (clearFields.tanggal) {
-    cy.get("#tanggal").clear();
-    cy.get("#tanggal").should("have.value", "");
-  }
-  if (clearFields.schools) {
-    cy.get('[id^="school-"]').each(($school) => {
-      if ($school.prop("checked")) {
-        cy.wrap($school).uncheck();
-      }
-    });
-  }
-  if (clearFields.images) {
-    cy.get('[id^="image-"]').then((images) => {
-      const imageCount = images.length;
-      for (let i = 0; i < imageCount; i++) {
-        cy.get("#button-gambar").first().click();
-      }
-    });
-  }
-  cy.get("button").contains("Simpan").click();
-});
