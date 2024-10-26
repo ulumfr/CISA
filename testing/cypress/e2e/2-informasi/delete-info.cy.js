@@ -12,7 +12,7 @@ describe("Delete Information Tests", () => {
     });
   });
 
-  it("TC013 - Batal Delete Informasi", () => {
+  it("TC013 - Batal delete informasi", () => {
     cy.get("#delete-button").first().click();
     cy.get("#konfirm-delete").should(
       "have.text",
@@ -22,7 +22,7 @@ describe("Delete Information Tests", () => {
     cy.url().should("include", "/admin/informasi");
   });
 
-  it("TC014 - Konfirmasi Delete Informasi", () => {
+  it("TC014 - Konfirmasi delete informasi", () => {
     cy.get("#delete-button").first().click();
     cy.get("#konfirm-delete").should(
       "have.text",
