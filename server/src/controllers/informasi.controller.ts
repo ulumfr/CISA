@@ -131,9 +131,8 @@ export default {
       const id = req.params.id;
 
       const [imagePath] = await conn.query<any>(`select fileName from imageinformasi where informasiId = ?`, [id]);
-      if (imagePath.length <= 0) {
-        return res.status(404).json({ message: "File not found" });
-      }
+      if (imagePath.length <= 0) return res.status(404).json({ message: "File not found" });
+      
       for (const imageDelete of imagePath) {
         removeFile(imageDelete.fileName);
       }
@@ -141,6 +140,7 @@ export default {
       await conn.query(`delete from taginformasi where informasiId = ?`, [id]);
       await conn.query(`DELETE FROM imageinformasi  WHERE informasiId = ?`, [id]);
       await conn.query(`DELETE FROM informasi  WHERE id = ?`, [id]);
+      
       return res.status(200).json({
         message: "Informasi berhasil dihapus",
       });
@@ -206,14 +206,7 @@ export default {
               }))
             : [];
 
-        return {
-          id: row.id,
-          judul: row.judul,
-          tanggal: row.tanggal,
-          deskripsi: row.deskripsi,
-          image: images,
-          sekolah: sekolah,
-        };
+        return { id: row.id, judul: row.judul, tanggal: row.tanggal, deskripsi: row.deskripsi, image: images, sekolah: sekolah };
       });
 
       return res.json(result);

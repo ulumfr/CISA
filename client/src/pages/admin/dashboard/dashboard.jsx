@@ -84,14 +84,7 @@ const DashboardPage = () => {
   };
 
   const submitModal = async () => {
-    if (
-      !formData.namaSekolah &&
-      !formData.noHandphone &&
-      !formData.jumlahAnak &&
-      !formData.jumlahPengajar &&
-      !formData.jumlahRuangan &&
-      !formData.jamPulang
-    ) {
+    if (!formData.namaSekolah && !formData.noHandphone && !formData.jumlahAnak && !formData.jumlahPengajar && !formData.jumlahRuangan && !formData.jamPulang) {
       return toast.error("Semua kolom harus diisi");
     } else if (!formData.namaSekolah) {
       return toast.error("Nama sekolah harus diisi");
@@ -140,7 +133,6 @@ const DashboardPage = () => {
       } else {
         toast.error(error.response.data.message);
       }
-      console.error("Error updating school data", error);
     } finally {
       setIsModalOpen(false);
       setCurrentEditData(null);

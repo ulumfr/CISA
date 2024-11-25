@@ -33,40 +33,27 @@ export default {
     });
   },
   async login(req: Request, res: Response) {
-    // const { username, password } = req.body;
-
     try {
-      await validateLoginSchema.validate(req.body);
       const userModel: userModel = req.body;
-
       const conn = await db;
-
       const SECRET: string = process.env.SECRET || "";
-      const [PASSWORD] = await conn.query<any>(`SELECT PASSWORD FROM users WHERE username=? `, [userModel.username]);
+      
+      if (!userModel.username || !userModel.password) return res.status(400).json({ message: "Username dan Password wajib diisi" });
 
+      const [PASSWORD] = await conn.query<any>(`SELECT PASSWORD FROM users WHERE username=? `, [userModel.username]);
       if (PASSWORD.length < 1) return res.status(404).json({ message: "User tidak ditemukan" });
 
       const passwordValue = PASSWORD[0].PASSWORD;
       const decryptPassword = decrypt(SECRET, passwordValue);
-
       if (decryptPassword !== userModel.password) return res.status(401).json({ message: "Password salah" });
 
-      const [result] = await conn.query<RowDataPacket[]>(
-        `SELECT u.id, u.sekolahId, u.role, s.namaSekolah
-         FROM users u
-         JOIN sekolah s ON u.sekolahId = s.id
-         WHERE u.username = ? AND u.password = ?`,
-        [userModel.username, passwordValue]
-      );
+      const [result] = await conn.query<RowDataPacket[]>(`SELECT u.id, u.sekolahId, u.role, s.namaSekolah FROM users u JOIN sekolah s ON u.sekolahId = s.id WHERE u.username = ? AND u.password = ?`, [userModel.username, passwordValue]);
 
-      // console.log(result);
       if (result.length > 0) {
         const token = jwt.sign(
-          { id: result[0].id, sekolahId: result[0].sekolahId, role: result[0].role, namaSekolah: result[0].namaSekolah },
-          process.env.SECRET || "",
-          {
-            expiresIn: "2h",
-          }
+          { id: result[0].id, sekolahId: result[0].sekolahId, role: result[0].role, namaSekolah: result[0].namaSekolah }, 
+          process.env.SECRET || "", 
+          { expiresIn: "2h" }
         );
 
         res.status(200).json({
@@ -86,22 +73,12 @@ export default {
     try {
       const authorizationHeader = req.headers.authorization;
 
-      if (!authorizationHeader) {
-        return res.status(400).json({
-          message: "Logout failed: No token provided",
-        });
-      }
+      if (!authorizationHeader) return res.status(400).json({message: "Logout failed: No token provided"});
 
       const [prefix, accessToken] = authorizationHeader.split(" ");
 
-      if (prefix !== "Bearer" || !accessToken) {
-        return res.status(400).json({
-          message: "Logout failed: Invalid token format",
-        });
-      }
+      if (prefix !== "Bearer" || !accessToken) return res.status(400).json({message: "Logout failed: Invalid token format"});
 
-      console.log(accessToken);
-      // Blacklist the token
       blacklistedTokens.add(accessToken);
 
       res.status(200).json({

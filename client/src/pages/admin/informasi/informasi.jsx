@@ -162,20 +162,10 @@ const InformasiPage = () => {
     setSelectedInformasi(null);
   };
 
-  const stripTags = (input) => {
-    return input.replace(/<\/?[^>]+(>|$)/g, "").trim();
-  };
-
   const handleSaveInformasi = async () => {
-    const cleanedDesc = stripTags(formData.desc);
+    const cleanedDesc = formData.desc.replace(/<\/?[^>]+(>|$)/g, "").trim();
 
-    if (
-      !formData.title &&
-      !cleanedDesc &&
-      !formData.tanggal &&
-      formData.sekolahId.length === 0 &&
-      formData.gambar.length === 0
-    ) {
+    if (!formData.title && !cleanedDesc && !formData.tanggal && formData.sekolahId.length === 0 && formData.gambar.length === 0) {
       return toast.error("Semua kolom harus diisi");
     } else if (!formData.title) {
       return toast.error("Judul informasi harus diisi");
@@ -197,16 +187,12 @@ const InformasiPage = () => {
     formDataToSend.append("sekolahId", formData.sekolahId.join(","));
 
     formData.gambar.forEach((file) => {
-      if (!file.idImage) {
-        formDataToSend.append("files", file.file);
-      }
+      if (!file.idImage) formDataToSend.append("files", file.file);
     });
 
-    console.log([...formDataToSend.entries()]);
     try {
       let response;
-      const deleteParams =
-        imagesToDelete.length > 0 ? `idImage=${imagesToDelete.join(",")}` : "";
+      const deleteParams = imagesToDelete.length > 0 ? `idImage=${imagesToDelete.join(",")}` : "";
 
       if (isEdit) {
         response = await axios.patch(
@@ -237,11 +223,8 @@ const InformasiPage = () => {
       if (error.response && error.response.status === 500) {
         toast.error(error.response.data.message);
       } else {
-        toast.error(
-          isEdit ? error.response.data.message : error.response.data.message
-        );
+        toast.error(isEdit ? error.response.data.message : error.response.data.message);
       }
-      console.error("Error saving informasi: ", error);
     } finally {
       setIsEditModalOpen(false);
       setSelectedInformasi(null);

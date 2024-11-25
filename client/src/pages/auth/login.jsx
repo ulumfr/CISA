@@ -30,12 +30,6 @@ const LoginPage = () => {
     e.preventDefault();
     setLoading(true);
 
-    if (!formData.username || !formData.password) {
-      toast.error("Username dan Password wajib diisi");
-      setLoading(false);
-      return;
-    }
-
     try {
       const response = await axios.post("/api/user/auth/login", formData);
       if (response.status === 200) {
@@ -48,6 +42,9 @@ const LoginPage = () => {
       setLoading(false);
       if (error.response) {
         switch (error.response.status) {
+          case 400:
+            toast.error(error.response.data.message);
+            break;
           case 401:
             toast.error(error.response.data.message);
             break;
