@@ -1,13 +1,10 @@
 import { Request, Response } from "express";
-import connect from "../utils/database";
 import userModel from "../models/user.model";
 import { RowDataPacket } from "mysql2/promise";
 import jwt from "jsonwebtoken";
 import { encrypt, decrypt } from "../utils/encryption";
-import * as Yup from "yup";
-import Sekolah from "../models/sekolah.model";
-
 import { db } from "../server";
+
 export const blacklistedTokens = new Set<string>();
 
 export default {
@@ -22,7 +19,6 @@ export default {
       `,
       [userModel.username, encryptPassword, userModel.role, userModel.noHandphone, userModel.sekolahId]
     );
-    // console.log(result);
     res.status(201).json({
       message: "User registered",
       result,
