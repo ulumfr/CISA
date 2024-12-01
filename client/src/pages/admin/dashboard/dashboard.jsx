@@ -84,22 +84,6 @@ const DashboardPage = () => {
   };
 
   const submitModal = async () => {
-    if (!formData.namaSekolah && !formData.noHandphone && !formData.jumlahAnak && !formData.jumlahPengajar && !formData.jumlahRuangan && !formData.jamPulang) {
-      return toast.error("Semua kolom harus diisi");
-    } else if (!formData.namaSekolah) {
-      return toast.error("Nama sekolah harus diisi");
-    } else if (!formData.noHandphone) {
-      return toast.error("No handphone harus diisi");
-    } else if (!formData.jumlahAnak) {
-      return toast.error("Jumlah anak harus diisi");
-    } else if (!formData.jumlahPengajar) {
-      return toast.error("Jumlah pengajar harus diisi");
-    } else if (!formData.jumlahRuangan) {
-      return toast.error("Jumlah ruangan harus diisi");
-    } else if (!formData.jamPulang) {
-      return toast.error("Jam pulang harus diisi");
-    }
-
     const formDataToSend = new FormData();
 
     formDataToSend.append("namaSekolah", formData.namaSekolah);

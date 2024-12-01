@@ -9,10 +9,6 @@ import Sekolah from "../models/sekolah.model";
 
 import { db } from "../server";
 export const blacklistedTokens = new Set<string>();
-const validateLoginSchema = Yup.object().shape({
-  username: Yup.string().required("Username harus diisi"),
-  password: Yup.string().required("Password harus diisi"),
-});
 
 export default {
   async register(req: Request, res: Response) {
