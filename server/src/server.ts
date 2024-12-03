@@ -10,7 +10,7 @@ import cors from "cors";
 
 // async function startServer() {
 const app = express();
-// const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000;
 
 export const db = connect();
 
@@ -33,9 +33,9 @@ app.use("/storage/uploads", express.static("./storage/uploads"));
 app.use("/api", routes);
 // async await connect();
 
-// app.listen(PORT, () => {
-//   console.log(`Server is running at http://localhost:${PORT}`);
-// });
+app.listen(PORT, () => {
+  console.log(`Server is running at http://localhost:${PORT}`);
+});
 
 export default app;
 

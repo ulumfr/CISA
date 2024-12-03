@@ -1,7 +1,6 @@
 import multer from "multer";
 import path from "path";
 import { encryptImage } from "../utils/encryption";
-import sharpCompression from "sharp";
 import compressImage from "../utils/compress.image";
 import { Request, Response, NextFunction, RequestHandler } from "express";
 
@@ -17,18 +16,15 @@ const storage = multer.diskStorage({
   },
 });
 
-const handleMulterError = (err: any, req: any, res: any, next: Function) => {
-  if (err instanceof multer.MulterError) {
-    if (err.code === "LIMIT_UNEXPECTED_FILE") {
-      // console.log(req);
-      
-      return res.status(400).json({ message:"Pilihan maksimal 5 foto" });
-    }
-    // Handle other Multer errors
-    return res.status(400).json({ error: err.message });
-  }
-  next(err); // Pass other errors to the default error handler
-};
+// const handleMulterError = (err: any, req: any, res: any, next: Function) => {
+//   if (err instanceof multer.MulterError) {
+//     if (err.code === "LIMIT_UNEXPECTED_FILE") { 
+//       return res.status(400).json({ message:"Pilihan maksimal 5 foto" });
+//     }
+//     return res.status(400).json({ error: err.message });
+//   }
+//   next(err);
+// };
 const compress: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
   if (req.file && req.file.size > 1000) {
     await compressImage(req.file.filename);
@@ -36,7 +32,6 @@ const compress: RequestHandler = async (req: Request, res: Response, next: NextF
   next();
 };
 
-// Multiple files compression middleware
 const compressImages: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
   if (req.files && Array.isArray(req.files)) {
     for (const img of req.files) {
@@ -63,11 +58,9 @@ const upload = multer({
   },
 });
 
-// export const single = upload.single("file");
-// export const multiple = upload.array("files", 10);
-
 export const single = [upload.single("file"), compress];
-export const multiple = [upload.array("files", 5), compressImages,handleMulterError];
+// export const multiple = [upload.array("files", 5), compressImages,handleMulterError];
+export const multiple = [upload.array("files"), compressImages];
 
 export default {
   single,

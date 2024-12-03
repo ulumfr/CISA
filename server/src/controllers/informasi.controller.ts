@@ -12,62 +12,43 @@ export default {
       const data: informasiModel = req.body;
 
       const files = req.files as Express.Multer.File[] | undefined;
-      const imagePaths = files
-        ? files.map((file: { filename: string }) => file.filename)
-        : [];
+      const imagePaths = files ? files.map((file: { filename: string }) => file.filename) : [];
+
+      if (imagePaths.length > 5) {  
+        return res.status(400).json({ message: "Pilihan maksimal 5 foto" });
+      }
 
       const cleanedDesc = data.deskripsi.replace(/<\/?[^>]+(>|$)/g, "").trim();
 
-      if (
-        !data.judul &&
-        !cleanedDesc &&
-        !data.tanggal &&
-        data.sekolahId.length === 0 &&
-        imagePaths.length === 0
-      ) {
+      if (!data.judul && !cleanedDesc && !data.tanggal && data.sekolahId.length === 0 && imagePaths.length === 0) {
         return res.status(400).json({ message: "Semua kolom harus diisi" });
       } else if (!data.judul) {
         return res.status(400).json({ message: "Judul informasi harus diisi" });
-      } else if (!data.deskripsi) {
-        return res
-          .status(400)
-          .json({ message: "Deskripsi informasi harus diisi" });
+      } else if (!cleanedDesc) {
+        return res.status(400).json({ message: "Deskripsi informasi harus diisi" });
       } else if (!data.tanggal) {
-        return res
-          .status(400)
-          .json({ message: "Tanggal informasi harus diisi" });
+        return res.status(400).json({ message: "Tanggal informasi harus diisi" });
       } else if (data.sekolahId.length === 0) {
-        return res
-          .status(400)
-          .json({ message: "Harus memilih minimal 1 sekolah" });
+        return res.status(400).json({ message: "Harus memilih minimal 1 sekolah" });
       } else if (imagePaths.length === 0) {
-        return res
-          .status(400)
-          .json({ message: "Minimal 1 gambar yang harus diupload" });
+        return res.status(400).json({ message: "Minimal 1 gambar yang harus diupload" });
       }
 
-      //   const imagePaths = files ? files.map((file) => `/${file.path.replace(/\\/g, "/")}`) : [];
-      //   //   console.log(imagePaths);
-      // if (imagePaths.length < 1) return res.status(500).json({ message: "Input gambar kosong" });
-
-      // console.log(compressDeskripsi);
       const [insertData] = await conn.query<ResultSetHeader>(
         `INSERT INTO informasi (judul,tanggal,deskripsi) values (?,?,?)`,
         [data.judul, data.tanggal, data.deskripsi]
       );
 
       const informasiId = insertData.insertId;
-
       const tagsArray = data.sekolahId.split(",");
 
       for (const sekolahId of tagsArray) {
-        // console.log(tagSekolah);
         await conn.query(
           `insert into taginformasi(informasiId,sekolahId) values (?,?) `,
           [informasiId, sekolahId]
         );
       }
-      // console.log(imagePaths);
+
       for (const imagePath of imagePaths) {
         await conn.query(
           "INSERT INTO imageinformasi (informasiId, fileName) VALUES (?, ?)",
@@ -93,39 +74,26 @@ export default {
       const conn = await db;
 
       const files = req.files as Express.Multer.File[] | undefined;
-      const imagePaths = files
-        ? files.map((file: { filename: string }) => file.filename)
-        : [];
+      const imagePaths = files ? files.map((file: { filename: string }) => file.filename) : [];
+
+      if (imagePaths.length > 5) {
+        return res.status(400).json({ message: "Pilihan maksimal 5 foto" });
+      }
 
       const cleanedDesc = data.deskripsi?.replace(/<\/?[^>]+(>|$)/g, "").trim();
 
-      if (
-        !data.judul &&
-        !cleanedDesc &&
-        !data.tanggal &&
-        (!data.sekolahId || data.sekolahId.length === 0) &&
-        imagePaths.length === 0 &&
-        !idImage
-      ) {
+      if (!data.judul && !cleanedDesc && !data.tanggal && data.sekolahId.length === 0 && imagePaths.length === 0) {
         return res.status(400).json({ message: "Semua kolom harus diisi" });
       } else if (!data.judul) {
         return res.status(400).json({ message: "Judul informasi harus diisi" });
-      } else if (!data.deskripsi) {
-        return res
-          .status(400)
-          .json({ message: "Deskripsi informasi harus diisi" });
+      } else if (!cleanedDesc) {
+        return res.status(400).json({ message: "Deskripsi informasi harus diisi" });
       } else if (!data.tanggal) {
-        return res
-          .status(400)
-          .json({ message: "Tanggal informasi harus diisi" });
-      } else if (!data.sekolahId || data.sekolahId.length === 0) {
-        return res
-          .status(400)
-          .json({ message: "Harus memilih minimal 1 sekolah" });
-      } else if (imagePaths.length === 0 && !idImage) {
-        return res
-          .status(400)
-          .json({ message: "Minimal 1 gambar yang harus diupload" });
+        return res.status(400).json({ message: "Tanggal informasi harus diisi" });
+      } else if (data.sekolahId.length === 0) {
+        return res.status(400).json({ message: "Harus memilih minimal 1 sekolah" });
+      } else if (imagePaths.length === 0) {
+        return res.status(400).json({ message: "Minimal 1 gambar yang harus diupload" });
       }
 
       if (idImage) {
@@ -144,7 +112,6 @@ export default {
         );
       }
 
-      // Insert new images
       for (const imagePath of imagePaths) {
         await conn.query(
           `INSERT INTO imageinformasi (informasiId, fileName) VALUES (?, ?)`,
@@ -152,7 +119,6 @@ export default {
         );
       }
 
-      // Update tags
       const tagsArray = data.sekolahId.split(",");
       if (tagsArray) {
         await conn.query(`DELETE FROM taginformasi WHERE informasiId = ?`, [
@@ -167,7 +133,6 @@ export default {
         }
       }
 
-      // Update fields
       if (data.judul) {
         await conn.query(`UPDATE informasi SET judul = ? WHERE id = ?`, [
           data.judul,
