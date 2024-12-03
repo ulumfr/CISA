@@ -146,15 +146,15 @@ const FasilitasPage = () => {
   };
 
   const handleSaveFasilitas = async () => {
-    if (!formData.title && !formData.sekolahId && !formData.gambar) {
-      return toast.error("Semua kolom harus diisi");
-    } else if (!formData.title) {
-      return toast.error("Judul fasilitas harus diisi");
-    } else if (!formData.sekolahId) {
-      return toast.error("Harus memilih sekolah");
-    } else if (!formData.gambar) {
-      return toast.error("Minimal upload gambar");
-    }
+    // if (!formData.title && !formData.sekolahId && !formData.gambar) {
+    //   return toast.error("Semua kolom harus diisi");
+    // } else if (!formData.title) {
+    //   return toast.error("Judul fasilitas harus diisi");
+    // } else if (!formData.sekolahId) {
+    //   return toast.error("Harus memilih sekolah");
+    // } else if (!formData.gambar) {
+    //   return toast.error("Minimal upload gambar");
+    // }
 
     const formDataToSend = new FormData();
 

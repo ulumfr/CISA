@@ -1,22 +1,11 @@
 import { Request, Response } from "express";
-import connect from "../utils/database";
 import fasilitasModel from "../models/fasilitas.model";
 import removeFile from "../utils/remove.file";
-import * as Yup from "yup";
-
 import { db } from "../server";
-const createValidationSchema = Yup.object().shape({
-  namaFasilitas: Yup.string().required("Nama fasilitas harus diisi").typeError("Inputan untuk 'namaFasilitas' harus berupa huruf"),
-});
-const updateValidationSchema = Yup.object().shape({
-  namaFasilitas: Yup.string().typeError("Inputan untuk 'namaFasilitas' harus berupa huruf"),
-  sekolahId: Yup.number().typeError("Inputan untuk 'sekolahId' harus berupa angka"),
-});
 
 export default {
   async createData(req: Request, res: Response) {
     try {
-      await createValidationSchema.validate(req.body);
       const conn = await db;
       const dataModel: fasilitasModel = req.body;
       const sekolahId = req.query.sekolahId;
@@ -25,7 +14,15 @@ export default {
       const imagePaths = req.file as Express.Multer.File | undefined;
       const imageUrl = imagePaths?.filename;
 
-      if (!imageUrl) return res.status(500).json({ message: "Input gambar kosong" });
+      if (!dataModel.namaFasilitas && !sekolahId && !imageUrl) {
+        return res.status(400).json({message: "Semua kolom harus diisi"});
+      } else if (!dataModel.namaFasilitas) {
+        return res.status(400).json({message: "Judul fasilitas harus diisi"});
+      } else if (!sekolahId) {
+        return res.status(400).json({message: "Harus memilih sekolah"});
+      } else if (!imageUrl) {
+        return res.status(400).json({message: "Minimal upload gambar"});
+      }
 
       const tanggalDibuat = date_time.toISOString().slice(0,10)
       await conn.query(`insert into fasilitas (namaFasilitas, imageName,sekolahId,tanggalDibuat) values (?,?,?,?)`, [
@@ -48,24 +45,29 @@ export default {
   },
   async updateData(req: Request, res: Response) {
     try {
-      await updateValidationSchema.validate(req.body);
       const conn = await db;
       const dataModel: fasilitasModel = req.body;
       const id = req.params.id;
 
       const [oldImage] = await conn.query<any>("select imageName from fasilitas where id = ?", [id]);
-
       const imagePaths = req.file as Express.Multer.File | undefined;
       const imageUrl = imagePaths?.filename;
 
+      if (!dataModel.namaFasilitas && !dataModel.sekolahId && !imageUrl) {
+        return res.status(400).json({message: "Semua kolom harus diisi"});
+      } else if (!dataModel.namaFasilitas) {
+        return res.status(400).json({message: "Judul fasilitas harus diisi"});
+      } else if (!dataModel.sekolahId) {
+        return res.status(400).json({message: "Harus memilih sekolah"});
+      } else if (!imageUrl) {
+        return res.status(400).json({message: "Minimal upload gambar"});
+      }
+      
       let updateWithImage;
       if (imageUrl) {
         removeFile(oldImage[0].imageName);
-        // console.log(oldImage[0].imageName);
-        // console.log("cek");
         updateWithImage = await conn.query(`update fasilitas set  imageName=? where id = ?`, [imageUrl, id]);
       }
-      let updateFasilitas;
 
       if (dataModel.namaFasilitas || dataModel.sekolahId) {
         await conn.query(`update fasilitas set ? where id = ?`, [dataModel, id]);
