@@ -163,21 +163,21 @@ const InformasiPage = () => {
   };
 
   const handleSaveInformasi = async () => {
-    const cleanedDesc = formData.desc.replace(/<\/?[^>]+(>|$)/g, "").trim();
+    // const cleanedDesc = formData.desc.replace(/<\/?[^>]+(>|$)/g, "").trim();
 
-    if (!formData.title && !cleanedDesc && !formData.tanggal && formData.sekolahId.length === 0 && formData.gambar.length === 0) {
-      return toast.error("Semua kolom harus diisi");
-    } else if (!formData.title) {
-      return toast.error("Judul informasi harus diisi");
-    } else if (!cleanedDesc) {
-      return toast.error("Deskripsi informasi harus diisi");
-    } else if (!formData.tanggal) {
-      return toast.error("Tanggal informasi harus diisi");
-    } else if (formData.sekolahId.length === 0) {
-      return toast.error("Harus memilih minimal 1 sekolah");
-    } else if (formData.gambar.length === 0) {
-      return toast.error("Minimal 1 gambar yang harus diupload");
-    }
+    // if (!formData.title && !cleanedDesc && !formData.tanggal && formData.sekolahId.length === 0 && formData.gambar.length === 0) {
+    //   return toast.error("Semua kolom harus diisi");
+    // } else if (!formData.title) {
+    //   return toast.error("Judul informasi harus diisi");
+    // } else if (!cleanedDesc) {
+    //   return toast.error("Deskripsi informasi harus diisi");
+    // } else if (!formData.tanggal) {
+    //   return toast.error("Tanggal informasi harus diisi");
+    // } else if (formData.sekolahId.length === 0) {
+    //   return toast.error("Harus memilih minimal 1 sekolah");
+    // } else if (formData.gambar.length === 0) {
+    //   return toast.error("Minimal 1 gambar yang harus diupload");
+    // }
 
     const formDataToSend = new FormData();
 
@@ -239,10 +239,10 @@ const InformasiPage = () => {
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
 
-    if (formData.gambar.length + files.length > 5) {
-      toast.error("Pilihan maksimal 5 foto");
-      return;
-    }
+    // if (formData.gambar.length + files.length > 5) {
+    //   toast.error("Pilihan maksimal 5 foto");
+    //   return;
+    // }
 
     const newPreviewImages = files.map((file) => ({
       idImage: null,

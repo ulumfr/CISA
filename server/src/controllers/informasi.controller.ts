@@ -1,44 +1,60 @@
 import { Request, Response } from "express";
-import connect from "../utils/database";
 import informasiModel from "../models/informasi.model";
 import removeFile from "../utils/remove.file";
 import { ResultSetHeader } from "mysql2";
-import * as Yup from "yup";
 
 import { db } from "../server";
-
-const updateValidationSchema = Yup.object().shape({
-  judul: Yup.string().typeError("Inputan untuk 'judul' harus berupa huruf"),
-  tanggal: Yup.date().typeError("Inputan untuk 'tanggal' harus berupa tanggal yang valid"),
-  deskripsi: Yup.string().typeError("Inputan untuk 'deskripsi' harus berupa huruf"),
-});
-
-const createValidationSchema = Yup.object().shape({
-  judul: Yup.string().required("Judul harus diisi").typeError("Inputan untuk 'judul' harus berupa huruf"),
-  tanggal: Yup.date().required("Tanggal harus diisi").typeError("Inputan untuk 'tanggal' harus berupa tanggal yang valid"),
-  deskripsi: Yup.string().required("Deskripsi harus diisi").typeError("Inputan untuk 'deskripsi' harus berupa huruf"),
-});
 
 export default {
   async createData(req: Request, res: Response) {
     try {
-      await createValidationSchema.validate(req.body);
       const conn = await db;
       const data: informasiModel = req.body;
 
       const files = req.files as Express.Multer.File[] | undefined;
-      const imagePaths = files ? files.map((file: { filename: string }) => file.filename) : [];
+      const imagePaths = files
+        ? files.map((file: { filename: string }) => file.filename)
+        : [];
+
+      const cleanedDesc = data.deskripsi.replace(/<\/?[^>]+(>|$)/g, "").trim();
+
+      if (
+        !data.judul &&
+        !cleanedDesc &&
+        !data.tanggal &&
+        data.sekolahId.length === 0 &&
+        imagePaths.length === 0
+      ) {
+        return res.status(400).json({ message: "Semua kolom harus diisi" });
+      } else if (!data.judul) {
+        return res.status(400).json({ message: "Judul informasi harus diisi" });
+      } else if (!data.deskripsi) {
+        return res
+          .status(400)
+          .json({ message: "Deskripsi informasi harus diisi" });
+      } else if (!data.tanggal) {
+        return res
+          .status(400)
+          .json({ message: "Tanggal informasi harus diisi" });
+      } else if (data.sekolahId.length === 0) {
+        return res
+          .status(400)
+          .json({ message: "Harus memilih minimal 1 sekolah" });
+      } else if (imagePaths.length === 0) {
+        return res
+          .status(400)
+          .json({ message: "Minimal 1 gambar yang harus diupload" });
+      }
 
       //   const imagePaths = files ? files.map((file) => `/${file.path.replace(/\\/g, "/")}`) : [];
       //   //   console.log(imagePaths);
-      if (imagePaths.length < 1) return res.status(500).json({ message: "Input gambar kosong" });
+      // if (imagePaths.length < 1) return res.status(500).json({ message: "Input gambar kosong" });
 
       // console.log(compressDeskripsi);
-      const [insertData] = await conn.query<ResultSetHeader>(`INSERT INTO informasi (judul,tanggal,deskripsi) values (?,?,?)`, [
-        data.judul,
-        data.tanggal,
-        data.deskripsi,
-      ]);
+      const [insertData] = await conn.query<ResultSetHeader>(
+        `INSERT INTO informasi (judul,tanggal,deskripsi) values (?,?,?)`,
+        [data.judul, data.tanggal, data.deskripsi]
+      );
 
       const informasiId = insertData.insertId;
 
@@ -46,11 +62,17 @@ export default {
 
       for (const sekolahId of tagsArray) {
         // console.log(tagSekolah);
-        await conn.query(`insert into taginformasi(informasiId,sekolahId) values (?,?) `, [informasiId, sekolahId]);
+        await conn.query(
+          `insert into taginformasi(informasiId,sekolahId) values (?,?) `,
+          [informasiId, sekolahId]
+        );
       }
       // console.log(imagePaths);
       for (const imagePath of imagePaths) {
-        await conn.query("INSERT INTO imageinformasi (informasiId, fileName) VALUES (?, ?)", [informasiId, imagePath]);
+        await conn.query(
+          "INSERT INTO imageinformasi (informasiId, fileName) VALUES (?, ?)",
+          [informasiId, imagePath]
+        );
       }
       return res.status(201).json({
         message: "Informasi berhasil dibuat",
@@ -65,53 +87,104 @@ export default {
   },
   async updateData(req: Request, res: Response) {
     try {
-      await updateValidationSchema.validate(req.body);
       const informasiId = req.params.id;
       const idImage = req.query.idImage;
       const data: informasiModel = req.body;
       const conn = await db;
 
+      const files = req.files as Express.Multer.File[] | undefined;
+      const imagePaths = files
+        ? files.map((file: { filename: string }) => file.filename)
+        : [];
+
+      const cleanedDesc = data.deskripsi?.replace(/<\/?[^>]+(>|$)/g, "").trim();
+
+      if (
+        !data.judul &&
+        !cleanedDesc &&
+        !data.tanggal &&
+        (!data.sekolahId || data.sekolahId.length === 0) &&
+        imagePaths.length === 0 &&
+        !idImage
+      ) {
+        return res.status(400).json({ message: "Semua kolom harus diisi" });
+      } else if (!data.judul) {
+        return res.status(400).json({ message: "Judul informasi harus diisi" });
+      } else if (!data.deskripsi) {
+        return res
+          .status(400)
+          .json({ message: "Deskripsi informasi harus diisi" });
+      } else if (!data.tanggal) {
+        return res
+          .status(400)
+          .json({ message: "Tanggal informasi harus diisi" });
+      } else if (!data.sekolahId || data.sekolahId.length === 0) {
+        return res
+          .status(400)
+          .json({ message: "Harus memilih minimal 1 sekolah" });
+      } else if (imagePaths.length === 0 && !idImage) {
+        return res
+          .status(400)
+          .json({ message: "Minimal 1 gambar yang harus diupload" });
+      }
+
       if (idImage) {
-        const idImageArray = (idImage as string).split(","); // Split comma-separated IDs
-        const [oldImages] = await conn.query<any>(`SELECT fileName FROM imageinformasi WHERE idImage IN (?) AND informasiId = ?`, [
-          idImageArray,
-          informasiId,
-        ]);
+        const idImageArray = (idImage as string).split(",");
+        const [oldImages] = await conn.query<any>(
+          `SELECT fileName FROM imageinformasi WHERE idImage IN (?) AND informasiId = ?`,
+          [idImageArray, informasiId]
+        );
 
         for (const img of oldImages) {
           removeFile(img.fileName);
         }
-        await conn.query(`DELETE FROM imageinformasi WHERE idImage IN (?) AND informasiId = ?`, [idImageArray, informasiId]);
+        await conn.query(
+          `DELETE FROM imageinformasi WHERE idImage IN (?) AND informasiId = ?`,
+          [idImageArray, informasiId]
+        );
       }
 
-      const files = req.files as Express.Multer.File[] | undefined;
-      const imagePaths = files ? files.map((file: { filename: string }) => file.filename) : [];
-
+      // Insert new images
       for (const imagePath of imagePaths) {
-        await conn.query(`INSERT INTO imageinformasi (informasiId, fileName) VALUES (?, ?)`, [informasiId, imagePath]);
+        await conn.query(
+          `INSERT INTO imageinformasi (informasiId, fileName) VALUES (?, ?)`,
+          [informasiId, imagePath]
+        );
       }
 
+      // Update tags
       const tagsArray = data.sekolahId.split(",");
-
       if (tagsArray) {
-        const [oldInformasiTag] = await conn.query(`select sekolahId from taginformasi`);
-        if (oldInformasiTag) {
-          await conn.query(`delete from taginformasi where informasiId=?  `, [informasiId]);
-        }
+        await conn.query(`DELETE FROM taginformasi WHERE informasiId = ?`, [
+          informasiId,
+        ]);
+
         for (const sekolahId of tagsArray) {
-          // console.log(sekolahId);
-          await conn.query(`insert into taginformasi(informasiId,sekolahId) values (?,?) `, [informasiId, sekolahId]);
+          await conn.query(
+            `INSERT INTO taginformasi (informasiId, sekolahId) VALUES (?, ?)`,
+            [informasiId, sekolahId]
+          );
         }
       }
 
+      // Update fields
       if (data.judul) {
-        await conn.query(`UPDATE informasi set judul=? WHERE id = ?`, [data.judul, informasiId]);
+        await conn.query(`UPDATE informasi SET judul = ? WHERE id = ?`, [
+          data.judul,
+          informasiId,
+        ]);
       }
       if (data.deskripsi) {
-        await conn.query(`UPDATE informasi set deskripsi=? WHERE id = ?`, [data.deskripsi, informasiId]);
+        await conn.query(`UPDATE informasi SET deskripsi = ? WHERE id = ?`, [
+          data.deskripsi,
+          informasiId,
+        ]);
       }
       if (data.tanggal) {
-        await conn.query(`UPDATE informasi set tanggal=? WHERE id = ?`, [data.tanggal, informasiId]);
+        await conn.query(`UPDATE informasi SET tanggal = ? WHERE id = ?`, [
+          data.tanggal,
+          informasiId,
+        ]);
       }
 
       return res.status(200).json({
@@ -130,17 +203,23 @@ export default {
       const conn = await db;
       const id = req.params.id;
 
-      const [imagePath] = await conn.query<any>(`select fileName from imageinformasi where informasiId = ?`, [id]);
-      if (imagePath.length <= 0) return res.status(404).json({ message: "File not found" });
-      
+      const [imagePath] = await conn.query<any>(
+        `select fileName from imageinformasi where informasiId = ?`,
+        [id]
+      );
+      if (imagePath.length <= 0)
+        return res.status(404).json({ message: "File not found" });
+
       for (const imageDelete of imagePath) {
         removeFile(imageDelete.fileName);
       }
 
       await conn.query(`delete from taginformasi where informasiId = ?`, [id]);
-      await conn.query(`DELETE FROM imageinformasi  WHERE informasiId = ?`, [id]);
+      await conn.query(`DELETE FROM imageinformasi  WHERE informasiId = ?`, [
+        id,
+      ]);
       await conn.query(`DELETE FROM informasi  WHERE id = ?`, [id]);
-      
+
       return res.status(200).json({
         message: "Informasi berhasil dihapus",
       });
@@ -206,7 +285,14 @@ export default {
               }))
             : [];
 
-        return { id: row.id, judul: row.judul, tanggal: row.tanggal, deskripsi: row.deskripsi, image: images, sekolah: sekolah };
+        return {
+          id: row.id,
+          judul: row.judul,
+          tanggal: row.tanggal,
+          deskripsi: row.deskripsi,
+          image: images,
+          sekolah: sekolah,
+        };
       });
 
       return res.json(result);

@@ -22,7 +22,7 @@ const handleMulterError = (err: any, req: any, res: any, next: Function) => {
     if (err.code === "LIMIT_UNEXPECTED_FILE") {
       // console.log(req);
       
-      return res.status(400).json({ message:"Maksimal Upload 5 Foto" });
+      return res.status(400).json({ message:"Pilihan maksimal 5 foto" });
     }
     // Handle other Multer errors
     return res.status(400).json({ error: err.message });
