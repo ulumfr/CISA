@@ -42,22 +42,11 @@ export default {
       const informasiId = insertData.insertId;
       const tagsArray = data.sekolahId.split(",");
 
-      for (const sekolahId of tagsArray) {
-        await conn.query(
-          `insert into taginformasi(informasiId,sekolahId) values (?,?) `,
-          [informasiId, sekolahId]
-        );
-      }
+      for (const sekolahId of tagsArray) await conn.query(`insert into taginformasi(informasiId,sekolahId) values (?,?) `, [informasiId, sekolahId]);
 
-      for (const imagePath of imagePaths) {
-        await conn.query(
-          "INSERT INTO imageinformasi (informasiId, fileName) VALUES (?, ?)",
-          [informasiId, imagePath]
-        );
-      }
-      return res.status(201).json({
-        message: "Informasi berhasil dibuat",
-      });
+      for (const imagePath of imagePaths) await conn.query("INSERT INTO imageinformasi (informasiId, fileName) VALUES (?, ?)", [informasiId, imagePath]);
+
+      return res.status(201).json({ message: "Informasi berhasil dibuat" });
     } catch (error) {
       const err = error as Error;
       res.status(500).json({

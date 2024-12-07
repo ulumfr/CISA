@@ -1,0 +1,32 @@
+async createData(req: Request, res: Response) {
+    try {
+        const conn = await db;
+        const dataModel: fasilitasModel = req.body;
+        const sekolahId = req.query.sekolahId;
+        let date_time = new Date();
+
+        const imagePaths = req.file as Express.Multer.File | undefined;
+        const imageUrl = imagePaths?.filename;
+
+        if (!dataModel.namaFasilitas && !sekolahId && !imageUrl) {
+            return res.status(400).json({message: "Semua kolom harus diisi"});
+        } else if (!dataModel.namaFasilitas) {
+            return res.status(400).json({message: "Judul fasilitas harus diisi"});
+        } else if (!sekolahId) {
+            return res.status(400).json({message: "Harus memilih sekolah"});
+        } else if (!imageUrl) {
+            return res.status(400).json({message: "Minimal upload gambar"});
+        }
+
+        const tanggalDibuat = date_time.toISOString().slice(0,10)
+        await conn.query(`insert into fasilitas (namaFasilitas, imageName,sekolahId,tanggalDibuat) values (?,?,?,?)`, [ dataModel.namaFasilitas, imageUrl, sekolahId, tanggalDibuat ]);
+
+        res.status(201).json({ message: "Fasilitas berhasil dibuat" });
+    } catch (error) {
+        const err = error as Error;
+        res.status(500).json({
+            information: err.message,
+            message: "Gagal membuat data Fasilitas!",
+        });
+    }
+},

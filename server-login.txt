@@ -1,0 +1,37 @@
+async login(req: Request, res: Response) {
+    try {
+        const userModel: userModel = req.body;
+        const conn = await db;
+        const SECRET: string = process.env.SECRET || "";
+        
+        if (!userModel.username || !userModel.password) { 
+            return res.status(400).json({ message: "Username dan Password wajib diisi" });
+        }
+
+        const [PASSWORD] = await conn.query<any>(`SELECT PASSWORD FROM users WHERE username=? `, [userModel.username]);
+        if (PASSWORD.length < 1) {
+            return res.status(404).json({ message: "User tidak ditemukan" });
+        }
+
+        const passwordValue = PASSWORD[0].PASSWORD;
+        const decryptPassword = decrypt(SECRET, passwordValue);
+        if (decryptPassword !== userModel.password) {
+            return res.status(401).json({ message: "Password salah" });
+        }
+
+        const [result] = await conn.query<RowDataPacket[]>(`SELECT u.id, u.sekolahId, u.role, s.namaSekolah FROM users u JOIN sekolah s ON u.sekolahId = s.id WHERE u.username = ? AND u.password = ?`, [userModel.username, passwordValue]);
+
+        if (result.length > 0) {
+            const token = jwt.sign({ id: result[0].id, sekolahId: result[0].sekolahId, role: result[0].role, namaSekolah: result[0].namaSekolah }, process.env.SECRET || "",  { expiresIn: "2h" });
+            res.status(200).json({ message: "Login berhasil", token });
+        }
+    } catch (error) {
+        const err = error as Error;
+        res.status(500).json({
+            information: err.message,
+            message: "Gagal Login",
+        });
+    }
+}
+
+

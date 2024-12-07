@@ -1,0 +1,44 @@
+async createData(req: Request, res: Response) {
+    try {
+        const conn = await db;
+        const data: informasiModel = req.body;
+
+        const files = req.files as Express.Multer.File[] | undefined;
+        const imagePaths = files ? files.map((file: { filename: string }) => file.filename) : [];
+
+        if (imagePaths.length > 5) {  
+            return res.status(400).json({ message: "Pilihan maksimal 5 foto" });
+        }
+
+        const cleanedDesc = data.deskripsi.replace(/<\/?[^>]+(>|$)/g, "").trim();
+
+        if (!data.judul && !cleanedDesc && !data.tanggal && data.sekolahId.length === 0 && imagePaths.length === 0) {
+            return res.status(400).json({ message: "Semua kolom harus diisi" });
+        } else if (!data.judul) {
+            return res.status(400).json({ message: "Judul informasi harus diisi" });
+        } else if (!cleanedDesc) {
+            return res.status(400).json({ message: "Deskripsi informasi harus diisi" });
+        } else if (!data.tanggal) {
+            return res.status(400).json({ message: "Tanggal informasi harus diisi" });
+        } else if (data.sekolahId.length === 0) {
+            return res.status(400).json({ message: "Harus memilih minimal 1 sekolah" });
+        } else if (imagePaths.length === 0) {
+            return res.status(400).json({ message: "Minimal 1 gambar yang harus diupload" });
+        }
+
+        const [insertData] = await conn.query<ResultSetHeader>(`INSERT INTO informasi (judul,tanggal,deskripsi) values (?,?,?)`, [data.judul, data.tanggal, data.deskripsi]);
+        const informasiId = insertData.insertId;
+        const tagsArray = data.sekolahId.split(",");
+
+        for (const sekolahId of tagsArray) await conn.query(`insert into taginformasi(informasiId,sekolahId) values (?,?) `, [informasiId, sekolahId]);
+        for (const imagePath of imagePaths) await conn.query("INSERT INTO imageinformasi (informasiId, fileName) VALUES (?, ?)", [informasiId, imagePath]);
+
+        return res.status(201).json({ message: "Informasi berhasil dibuat"});
+    } catch (error) {
+        const err = error as Error;
+        res.status(500).json({
+            information: err.message,
+            message: "Gagal membuat informasi!",
+        });
+    }
+},
